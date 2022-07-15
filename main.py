@@ -1,22 +1,28 @@
-from telegram import Update
-from telegram.ext import Updater
+import time
+
+from telegram import Update, ReplyKeyboardRemove
+from telegram.ext import Updater, CommandHandler
 from telegram.ext import CallbackContext
 from telegram.ext import Filters
 from telegram.ext import MessageHandler
 from telegram import KeyboardButton
 from telegram import ReplyKeyboardMarkup
+import requests
+import urllib.parse
+from bs4 import BeautifulSoup
+from fake_headers import Headers
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from parser import *
 
-button_help = "Помощь"
 
-
-def message_handler(update: Update, context: CallbackContext):
-    text = update.message.text
-    reply_markup = ReplyKeyboardMarkup(keyboard=[
-        [
-            KeyboardButton(text=button_help)
-        ],
-    ], resize_keyboard=True)
-    update.message.reply_text(text='Obeme', reply_markup=reply_markup)
+def main_handler(update: Update, context: CallbackContext):
+    text = update.message.text.replace(' ', '%20')
+    main_url = f"https://www.labirint.ru/search/{text}/?stype=0"
+    rq = requests.get(main_url)
+    parse_products = parse_request(rq)
+    update.message.reply_text(parse_result(parse_products))
 
 
 def main():
@@ -24,8 +30,8 @@ def main():
         token='5401890954:AAHlln3oV_nJ_9jYnrLihl7ApNLssntAbAQ',
         use_context=True
     )
-    updater.dispatcher.add_handler(MessageHandler(filters=Filters.text, callback=message_handler))
-
+    dp = updater.dispatcher
+    dp.add_handler(MessageHandler(filters=Filters.text, callback=main_handler))
     updater.start_polling()
     updater.idle()
 
