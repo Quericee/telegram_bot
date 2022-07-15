@@ -14,7 +14,7 @@ from fake_headers import Headers
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from parser import *
+from parser_labirint import *
 
 
 def main_handler(update: Update, context: CallbackContext):
